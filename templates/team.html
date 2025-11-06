@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Equipe - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Kanban Board</h1>
+            <div class="nav-menu">
+                <span class="username">{{ current_user.username }}</span>
+                <a href="{{ url_for('kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Gerenciar Equipe: {{ team.name }}</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="team-section">
+            <h3>Adicionar Novo Membro</h3>
+            <form method="POST" class="team-form">
+                <input type="hidden" name="action" value="add_member">
+                <div class="form-row">
+                    <input type="text" name="username" placeholder="Nome de usuário" required>
+                    <input type="password" name="password" placeholder="Senha" required>
+                    <button type="submit" class="btn btn-success">Adicionar Membro</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="team-section">
+            <h3>Membros da Equipe</h3>
+            <table class="team-table">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Tipo</th>
+                        <th>Data de Criação</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                        <tr>
+                            <td>{{ member.username }}</td>
+                            <td>
+                                {% if member.is_admin %}
+                                    <span class="badge badge-admin">Admin</span>
+                                {% else %}
+                                    <span class="badge badge-member">Membro</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ member.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                {% if not member.is_admin %}
+                                    <form method="POST" style="display: inline;">
+                                        <input type="hidden" name="action" value="remove_member">
+                                        <input type="hidden" name="user_id" value="{{ member.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja remover este membro?')">Remover</button>
+                                    </form>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="credentials-section">
+            <h3>Credenciais de Acesso</h3>
+            <p>Compartilhe estas credenciais com os membros da equipe:</p>
+            <div class="credentials-info">
+                <p><strong>URL de acesso:</strong> <code>{{ request.url_root }}login</code></p>
+                <p><strong>Equipe:</strong> {{ team.name }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

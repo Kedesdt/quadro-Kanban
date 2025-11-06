@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - Kanban Board</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Kanban Board - Histórico</h1>
+            <div class="nav-menu">
+                <span class="username">{{ current_user.username }}</span>
+                <a href="{{ url_for('kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
+                {% endif %}
+                <a href="{{ url_for('export_data') }}" class="btn btn-secondary">Exportar</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>📊 Histórico de Cards Arquivados</h2>
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <h4>Total Arquivado</h4>
+                <p class="stat-number">{{ total_archived }}</p>
+            </div>
+            <div class="stat-card">
+                <h4>Tempo Médio de Conclusão</h4>
+                <p class="stat-number">{{ "%.1f"|format(avg_completion_time) }}h</p>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h3>Cards Arquivados</h3>
+            <p class="info-text">Cards são arquivados automaticamente após 2 dias na coluna "Concluído"</p>
+            
+            {% if archived_cards %}
+                <div class="cards-grid">
+                    {% for card in archived_cards %}
+                        <div class="history-card" style="border-left: 5px solid {{ card.color }};">
+                            <div class="card-badge archived-badge">📦 Arquivado</div>
+                            <h4>{{ card.title }}</h4>
+                            {% if card.description %}
+                                <p class="card-desc">{{ card.description }}</p>
+                            {% endif %}
+                            
+                            <div class="card-metrics">
+                                <div class="metric">
+                                    <strong>Criado por:</strong> {{ card.creator.username }}
+                                </div>
+                                <div class="metric">
+                                    <strong>Responsável:</strong> 
+                                    {% if card.assigned_to %}
+                                        {{ card.assigned_to.username }}
+                                    {% else %}
+                                        Não atribuído
+                                    {% endif %}
+                                </div>
+                                <div class="metric">
+                                    <strong>Data Criação:</strong> {{ card.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                </div>
+                                <div class="metric">
+                                    <strong>Data Conclusão:</strong> 
+                                    {% if card.completed_at %}
+                                        {{ card.completed_at.strftime('%d/%m/%Y %H:%M') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </div>
+                                <div class="metric">
+                                    <strong>Arquivado em:</strong> {{ card.archived_at.strftime('%d/%m/%Y %H:%M') }}
+                                </div>
+                                {% if card.completed_at and card.created_at %}
+                                    <div class="metric highlight">
+                                        <strong>⏱️ Tempo Total:</strong> 
+                                        {% set hours = ((card.completed_at - card.created_at).total_seconds() / 3600) | round(1) %}
+                                        {{ hours }}h
+                                        {% if hours >= 24 %}
+                                            ({{ (hours / 24) | round(1) }} dias)
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            {% if card.history %}
+                                <details class="card-timeline">
+                                    <summary>📋 Ver Timeline Completa</summary>
+                                    <div class="timeline">
+                                        {% for h in card.history %}
+                                            <div class="timeline-item">
+                                                <span class="timeline-date">{{ h.timestamp.strftime('%d/%m %H:%M') }}</span>
+                                                <span class="timeline-action">
+                                                    {% if h.action == 'created' %}
+                                                        🆕 Criado
+                                                    {% elif h.action == 'moved' %}
+                                                        ➡️ Movido: {{ h.old_status }} → {{ h.new_status }}
+                                                    {% elif h.action == 'assigned' %}
+                                                        👤 Atribuído
+                                                    {% elif h.action == 'completed' %}
+                                                        ✅ Concluído
+                                                    {% elif h.action == 'archived' %}
+                                                        📦 Arquivado
+                                                    {% endif %}
+                                                </span>
+                                                <span class="timeline-user">por {{ h.user.username }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>📭 Nenhum card arquivado ainda</p>
+                    <p>Cards são arquivados automaticamente após 2 dias na coluna "Concluído"</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

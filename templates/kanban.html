@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadro Kanban</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Kanban Board</h1>
+            <div class="nav-menu">
+                <span class="username">{{ current_user.username }}</span>
+                {% if current_user.is_admin %}
+                    <a href="{{ url_for('team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
+                {% endif %}
+                <a href="{{ url_for('history') }}" class="btn btn-secondary">Histórico</a>
+                <a href="{{ url_for('export_data') }}" class="btn btn-secondary">Exportar</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="create-card-section">
+            <h2>Criar Novo Card</h2>
+            <form id="createCardForm">
+                <div class="form-row">
+                    <input type="text" id="cardTitle" placeholder="Título do card" required>
+                    <input type="text" id="cardDescription" placeholder="Descrição (opcional)">
+                    <select id="cardColor" class="color-select">
+                        <option value="#667eea">🔵 Azul</option>
+                        <option value="#764ba2">🟣 Roxo</option>
+                        <option value="#f093fb">💗 Rosa</option>
+                        <option value="#4facfe">🔷 Azul Claro</option>
+                        <option value="#43e97b">🟢 Verde</option>
+                        <option value="#fa709a">🌸 Rosa Forte</option>
+                        <option value="#fee140">🟡 Amarelo</option>
+                        <option value="#30cfd0">🔹 Ciano</option>
+                        <option value="#a8edea">💠 Água</option>
+                        <option value="#ff9a9e">🌺 Coral</option>
+                        <option value="#fbc2eb">💜 Lavanda</option>
+                        <option value="#a1c4fd">💙 Azul Pastel</option>
+                    </select>
+                    <button type="submit" class="btn btn-success">Criar Card</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="kanban-board">
+            <div class="kanban-column" data-status="todo">
+                <div class="column-header">
+                    <h3>A Fazer</h3>
+                    <span class="card-count">0</span>
+                </div>
+                <div class="card-container" id="todo-container">
+                    {% for card in cards %}
+                        {% if card.status == 'todo' %}
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="card-header">
+                                    <h4>{{ card.title }}</h4>
+                                    <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="card-footer">
+                                    <small>Criado: {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="assigned-badge" style="background: {{ card.color }};">👤 {{ card.assigned_to.username }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="kanban-column" data-status="doing">
+                <div class="column-header">
+                    <h3>Fazendo</h3>
+                    <span class="card-count">0</span>
+                </div>
+                <div class="card-container" id="doing-container">
+                    {% for card in cards %}
+                        {% if card.status == 'doing' %}
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="card-header">
+                                    <h4>{{ card.title }}</h4>
+                                    <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="card-footer">
+                                    <small>Criado: {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="assigned-badge" style="background: {{ card.color }};">👤 {{ card.assigned_to.username }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="kanban-column" data-status="done">
+                <div class="column-header">
+                    <h3>Concluído</h3>
+                    <span class="card-count">0</span>
+                </div>
+                <div class="card-container" id="done-container">
+                    {% for card in cards %}
+                        {% if card.status == 'done' %}
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="card-header">
+                                    <h4>{{ card.title }}</h4>
+                                    <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="card-footer">
+                                    <small>Criado: {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="assigned-badge" style="background: {{ card.color }};">👤 {{ card.assigned_to.username }}</span>
+                                    {% endif %}
+                                    {% if card.completed_at %}
+                                        <small class="completed-time">✓ {{ card.completed_at.strftime('%d/%m %H:%M') }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/kanban.js') }}"></script>
+</body>
+</html>

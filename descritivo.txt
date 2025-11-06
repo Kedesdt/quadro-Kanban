@@ -1,0 +1,3 @@
+quadro kanban web com iteraçao em tempo real, com designer moderno, utilizando tecnologias como flask e seus agregados, websocket, 
+a criaçao dos cards deve ser feita na mesma tela, cria-se o card arrasta, e enquando ele vai passando pelo quadro vai sendo anotado tudo no banco de dados, ao final fica tudo salvo e pode ser visto e exportado em outra pagina
+um admin cria o seu login, adiciona sua equipe recebe os acessos de cada componente  e distribui, cada um com seu acesso faz as modificaçoes
