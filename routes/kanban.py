@@ -77,3 +77,28 @@ def kanban():
     return render_template(
         "kanban.html", cards=cards, team_members=team_members, card_colors=card_colors
     )
+
+
+@kanban_bp.route("/kanban/fullscreen")
+@login_required
+def kanban_fullscreen():
+    """Visualização em tela cheia do quadro Kanban sem botões de criação"""
+    if not current_user.team_id:
+        flash("Você não está em nenhuma equipe", "error")
+        return redirect(url_for("auth.logout"))
+
+    # Arquivar cards antigos
+    archive_old_completed_cards()
+
+    # Buscar apenas cards não arquivados
+    cards = (
+        Card.query.filter_by(team_id=current_user.team_id, archived=False)
+        .order_by(Card.position)
+        .all()
+    )
+
+    team_members = User.query.filter_by(team_id=current_user.team_id).all()
+
+    return render_template(
+        "kanban_fullscreen.html", cards=cards, team_members=team_members
+    )

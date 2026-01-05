@@ -129,6 +129,7 @@ def register_websocket_events(socketio):
                     "status": card.status,
                     "position": card.position,
                     "color": card.color,
+                    "creator": card.creator.username,
                     "assigned_to": (
                         card.assigned_to.username if card.assigned_to else None
                     ),

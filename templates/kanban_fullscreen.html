@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board - Tela Cheia</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fullscreen.css') }}">
+</head>
+<body class="fullscreen">
+    <div class="fullscreen-header">
+        <button id="exitButton" class="exit-fullscreen" onclick="window.location.href='{{ url_for('kanban.kanban') }}'" data-url="{{ url_for('kanban.kanban') }}">
+            Voltar
+        </button>
+    </div>
+
+    <div class="fullscreen-container">
+        <div class="fullscreen-board">
+            <!-- Coluna: A Fazer -->
+            <div class="fullscreen-column" data-status="todo">
+                <div class="fullscreen-column-header">
+                    <h3>📋 A Fazer</h3>
+                    <span class="fullscreen-card-count" id="todo-count">0</span>
+                </div>
+                <div class="fullscreen-card-container" id="todo-container">
+                    {% for card in cards %}
+                        {% if card.status == 'todo' %}
+                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="fullscreen-card-header">
+                                    <h4>{{ card.title }}</h4>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="fullscreen-card-footer">
+                                    <small>👤 {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
+                                            ✓ {{ card.assigned_to.username }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coluna: Fazendo -->
+            <div class="fullscreen-column" data-status="doing">
+                <div class="fullscreen-column-header">
+                    <h3>⚡ Fazendo</h3>
+                    <span class="fullscreen-card-count" id="doing-count">0</span>
+                </div>
+                <div class="fullscreen-card-container" id="doing-container">
+                    {% for card in cards %}
+                        {% if card.status == 'doing' %}
+                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="fullscreen-card-header">
+                                    <h4>{{ card.title }}</h4>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="fullscreen-card-footer">
+                                    <small>👤 {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
+                                            ✓ {{ card.assigned_to.username }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coluna: Concluído -->
+            <div class="fullscreen-column" data-status="done">
+                <div class="fullscreen-column-header">
+                    <h3>✅ Concluído</h3>
+                    <span class="fullscreen-card-count" id="done-count">0</span>
+                </div>
+                <div class="fullscreen-card-container" id="done-container">
+                    {% for card in cards %}
+                        {% if card.status == 'done' %}
+                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                                <div class="fullscreen-card-header">
+                                    <h4>{{ card.title }}</h4>
+                                </div>
+                                {% if card.description %}
+                                    <p>{{ card.description }}</p>
+                                {% endif %}
+                                <div class="fullscreen-card-footer">
+                                    <small>👤 {{ card.creator.username }}</small>
+                                    {% if card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
+                                            ✓ {{ card.assigned_to.username }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="refresh-indicator" id="refreshIndicator">
+        🔄 Atualizando...
+    </div>
+
+    <div class="connection-status" id="connectionStatus">
+        <span class="status-dot"></span>
+        <span id="statusText">Conectado</span>
+    </div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
+</body>
+</html>

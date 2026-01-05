@@ -12,6 +12,7 @@
             <h1>Kanban Board</h1>
             <div class="nav-menu">
                 <span class="username">{{ current_user.username }}</span>
+                <a href="{{ url_for('kanban.kanban_fullscreen') }}" class="btn btn-primary" title="Visualizar em tela cheia">🖥️ Tela Cheia</a>
                 {% if current_user.is_admin %}
                     <a href="{{ url_for('team.team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
                 {% endif %}
