@@ -117,6 +117,11 @@
         <span id="statusText">Conectado</span>
     </div>
 
+    <!-- Configuração do WebSocket -->
+    <script>
+        window.SOCKET_PATH = "{{ socket_path }}";
+    </script>
+
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
 </body>

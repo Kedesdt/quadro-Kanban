@@ -1,5 +1,11 @@
-// Conectar ao WebSocket
-const socket = io();
+// Conectar ao WebSocket usando o caminho configurado
+const socket = io({
+    path: window.SOCKET_PATH || '/socket.io/',
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionAttempts: 10
+});
 
 // Atualizar contadores de cards
 function updateCardCounts() {
