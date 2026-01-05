@@ -66,6 +66,9 @@
                             <td>{{ member.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
                             <td>
                                 {% if not member.is_admin %}
+                                    <form method="POST" action="{{ url_for('team.generate_reset_link', user_id=member.id) }}" style="display: inline; margin-right: 5px;">
+                                        <button type="submit" class="btn btn-warning btn-sm" title="Gerar link de reset de senha">🔑 Reset Senha</button>
+                                    </form>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="remove_member">
                                         <input type="hidden" name="user_id" value="{{ member.id }}">
@@ -90,5 +93,35 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+
+    <script>
+        // Função para copiar link de reset para a área de transferência
+        document.addEventListener('DOMContentLoaded', function() {
+            // Encontrar mensagens de sucesso com links
+            const alerts = document.querySelectorAll('.alert-success');
+            alerts.forEach(alert => {
+                const text = alert.textContent;
+                const urlMatch = text.match(/(http[s]?:\/\/[^\s]+)/);
+                
+                if (urlMatch && text.includes('Link de reset gerado')) {
+                    const url = urlMatch[0];
+                    
+                    // Adicionar botão para copiar
+                    const copyBtn = document.createElement('button');
+                    copyBtn.textContent = '📋 Copiar Link';
+                    copyBtn.className = 'btn btn-primary btn-sm';
+                    copyBtn.style.marginLeft = '10px';
+                    copyBtn.onclick = function() {
+                        navigator.clipboard.writeText(url).then(() => {
+                            copyBtn.textContent = '✓ Link Copiado!';
+                            setTimeout(() => {
+                                copyBtn.textContent = '📋 Copiar Link';
+                            }, 2000);
+                        });
+                    };
+                    
+                    alert.appendChild(copyBtn);
+                }
+            });
+        });
+    </script>
