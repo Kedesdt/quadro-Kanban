@@ -13,11 +13,11 @@
             <div class="nav-menu">
                 <span class="username">{{ current_user.username }}</span>
                 {% if current_user.is_admin %}
-                    <a href="{{ url_for('team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
+                    <a href="{{ url_for('team.team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
                 {% endif %}
-                <a href="{{ url_for('history') }}" class="btn btn-secondary">Histórico</a>
-                <a href="{{ url_for('export_data') }}" class="btn btn-secondary">Exportar</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+                <a href="{{ url_for('history.history') }}" class="btn btn-secondary">Histórico</a>
+                <a href="{{ url_for('export.export_data') }}" class="btn btn-secondary">Exportar</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
             </div>
         </div>
     </nav>

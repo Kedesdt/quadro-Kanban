@@ -12,8 +12,8 @@
             <h1>Kanban Board</h1>
             <div class="nav-menu">
                 <span class="username">{{ current_user.username }}</span>
-                <a href="{{ url_for('kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+                <a href="{{ url_for('kanban.kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
             </div>
         </div>
     </nav>

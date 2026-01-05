@@ -12,11 +12,11 @@
             <h1>Kanban Board</h1>
             <div class="nav-menu">
                 <span class="username">{{ current_user.username }}</span>
-                <a href="{{ url_for('kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
+                <a href="{{ url_for('kanban.kanban') }}" class="btn btn-secondary">Quadro Kanban</a>
                 {% if current_user.is_admin %}
-                    <a href="{{ url_for('team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
+                    <a href="{{ url_for('team.team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
                 {% endif %}
-                <a href="{{ url_for('logout') }}" class="btn btn-danger">Sair</a>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
             </div>
         </div>
     </nav>
@@ -27,7 +27,7 @@
         <div class="export-section">
             <h3>Opções de Exportação</h3>
             <div class="export-buttons">
-                <a href="{{ url_for('export_json') }}" class="btn btn-primary" download="kanban_export.json">Exportar JSON</a>
+                <a href="{{ url_for('export.export_json') }}" class="btn btn-primary" download="kanban_export.json">Exportar JSON</a>
                 <button onclick="exportToCSV()" class="btn btn-success">Exportar CSV</button>
                 <button onclick="window.print()" class="btn btn-secondary">Imprimir/PDF</button>
             </div>
