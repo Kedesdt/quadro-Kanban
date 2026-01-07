@@ -1,12 +1,3 @@
-// Conectar ao WebSocket usando o caminho configurado
-const socket = io({
-    path: window.SOCKET_PATH || '/socket.io/',
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 10
-});
-
 // Atualizar contadores de cards
 function updateCardCounts() {
     const todoCount = document.querySelectorAll('#todo-container .fullscreen-card').length;
@@ -18,8 +9,32 @@ function updateCardCounts() {
     document.getElementById('done-count').textContent = doneCount;
 }
 
-// Adicionar card ao quadro em tempo real
-function addCardToBoard(data) {
+// Atalhos de teclado
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        window.location.href = document.getElementById('exitButton').dataset.url;
+    }
+    if (e.key === 'F5') {
+        e.preventDefault();
+        location.reload();
+    }
+});
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    updateCardCounts();
+    
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+    console.log('%c🖥️  MODO TELA CHEIA - QUADRO KANBAN', 'font-size: 16px; font-weight: bold; color: #667eea;');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+    console.log('%c⌨️  Atalhos de Teclado:', 'font-size: 14px; font-weight: bold; color: #48bb78;');
+    console.log('%c   • ESC - Sair da tela cheia', 'font-size: 13px; color: #666;');
+    console.log('%c   • F5  - Atualizar manualmente', 'font-size: 13px; color: #666;');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+    console.log('%c🔄 Atualização automática: A CADA 60 SEGUNDOS', 'font-size: 14px; font-weight: bold; color: #48bb78;');
+    console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+});
+
     console.log('➕ Adicionando card ao quadro:', data);
     const container = document.getElementById(`${data.status}-container`);
     
@@ -252,7 +267,6 @@ document.addEventListener('keydown', function(e) {
 // Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     updateCardCounts();
-    updateConnectionStatus(socket.connected);
     
     console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
     console.log('%c🖥️  MODO TELA CHEIA - QUADRO KANBAN', 'font-size: 16px; font-weight: bold; color: #667eea;');
@@ -261,8 +275,6 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('%c   • ESC - Sair da tela cheia', 'font-size: 13px; color: #666;');
     console.log('%c   • F5  - Atualizar manualmente', 'font-size: 13px; color: #666;');
     console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
-    console.log('%c🔄 WebSocket Status: ATIVO', 'font-size: 14px; font-weight: bold; color: #48bb78;');
-    console.log('%c   • Atualizações em tempo real habilitadas', 'font-size: 13px; color: #666;');
-    console.log('%c   • Animações de movimento entre colunas: ON', 'font-size: 13px; color: #666;');
+    console.log('%c🔄 Atualização automática: A CADA 60 SEGUNDOS', 'font-size: 14px; font-weight: bold; color: #48bb78;');
     console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
 });

@@ -1,12 +1,3 @@
-// Conectar ao WebSocket usando o caminho configurado
-const socket = io({
-    path: window.SOCKET_PATH || '/socket.io/',
-    transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 10
-});
-
 let draggedCard = null;
 
 // Inicialização
@@ -14,30 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDragAndDrop();
     setupCreateCardForm();
     updateCardCounts();
-});
-
-// Socket.IO Events
-socket.on('connect', function() {
-    console.log('Conectado ao servidor');
-});
-
-socket.on('card_created', function(data) {
-    addCardToBoard(data);
-    updateCardCounts();
-});
-
-socket.on('card_updated', function(data) {
-    updateCardOnBoard(data);
-    updateCardCounts();
-});
-
-socket.on('card_deleted', function(data) {
-    removeCardFromBoard(data.id);
-    updateCardCounts();
-});
-
-socket.on('user_connected', function(data) {
-    console.log('Usuário conectado:', data.username);
 });
 
 // Formulário de criação de cards
@@ -52,114 +19,50 @@ function setupCreateCardForm() {
         const color = document.getElementById('cardColor').value;
         
         if (title) {
-            socket.emit('create_card', {
-                title: title,
-                description: description,
-                status: 'todo',
-                position: 0,
-                color: color
-            });
-            
-            // Limpar formulário
-            form.reset();
+            fetch('/api/cards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: title,
+                    description: description,
+                    status: 'todo',
+                    position: 0,
+                    color: color
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Limpar formulário e recarregar página
+                    form.reset();
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Erro ao criar card:', error));
         }
     });
 }
 
-// Adicionar card ao quadro
-function addCardToBoard(cardData) {
-    const container = document.getElementById(`${cardData.status}-container`);
-    
-    // Verificar se o card já existe
-    if (document.querySelector(`[data-id="${cardData.id}"]`)) {
-        return;
-    }
-    
-    const cardElement = createCardElement(cardData);
-    container.appendChild(cardElement);
-}
 
-// Criar elemento de card
-function createCardElement(cardData) {
-    const card = document.createElement('div');
-    card.className = 'kanban-card';
-    card.draggable = true;
-    card.dataset.id = cardData.id;
-    card.style.borderLeft = `5px solid ${cardData.color}`;
-    card.style.background = `linear-gradient(135deg, ${cardData.color}15, white)`;
-    
-    let assignedBadge = '';
-    if (cardData.assigned_to) {
-        assignedBadge = `<span class="assigned-badge" style="background: ${cardData.color};">👤 ${escapeHtml(cardData.assigned_to)}</span>`;
-    }
-    
-    card.innerHTML = `
-        <div class="card-header">
-            <h4>${escapeHtml(cardData.title)}</h4>
-            <button class="delete-btn" onclick="deleteCard(${cardData.id})">×</button>
-        </div>
-        ${cardData.description ? `<p>${escapeHtml(cardData.description)}</p>` : ''}
-        <div class="card-footer">
-            <small>Criado: ${escapeHtml(cardData.creator)}</small>
-            ${assignedBadge}
-        </div>
-    `;
-    
-    // Adicionar eventos de drag
-    setupCardDragEvents(card);
-    
-    return card;
-}
-
-// Atualizar card no quadro
-function updateCardOnBoard(cardData) {
-    const cardElement = document.querySelector(`[data-id="${cardData.id}"]`);
-    
-    if (cardElement) {
-        // Se o status mudou, mover para a nova coluna
-        const currentContainer = cardElement.parentElement;
-        const newContainer = document.getElementById(`${cardData.status}-container`);
-        
-        if (currentContainer !== newContainer) {
-            newContainer.appendChild(cardElement);
-        }
-        
-        // Atualizar conteúdo
-        const titleElement = cardElement.querySelector('.card-header h4');
-        if (titleElement) {
-            titleElement.textContent = cardData.title;
-        }
-        
-        // Atualizar badge de responsável
-        const footer = cardElement.querySelector('.card-footer');
-        if (footer && cardData.assigned_to) {
-            const existingBadge = footer.querySelector('.assigned-badge');
-            if (existingBadge) {
-                existingBadge.textContent = `👤 ${cardData.assigned_to}`;
-                existingBadge.style.background = cardData.color;
-            } else {
-                const badge = document.createElement('span');
-                badge.className = 'assigned-badge';
-                badge.style.background = cardData.color;
-                badge.textContent = `👤 ${cardData.assigned_to}`;
-                footer.appendChild(badge);
-            }
-        }
-    }
-}
-
-// Remover card do quadro
-function removeCardFromBoard(cardId) {
-    const cardElement = document.querySelector(`[data-id="${cardId}"]`);
-    if (cardElement) {
-        cardElement.remove();
-    }
-}
 
 // Deletar card
 function deleteCard(cardId) {
     if (confirm('Tem certeza que deseja deletar este card?')) {
-        socket.emit('delete_card', { id: cardId });
+        fetch(`/api/cards/${cardId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Erro ao deletar card:', error));
     }
 }
 
@@ -228,17 +131,50 @@ function handleDrop(e) {
     if (draggedCard) {
         const newStatus = this.closest('.kanban-column').dataset.status;
         const cardId = parseInt(draggedCard.dataset.id);
+        const oldContainer = draggedCard.parentElement;
+        
+        console.log('🔄 Movendo card:', cardId, 'para:', newStatus);
         
         // Adicionar à nova coluna
         this.appendChild(draggedCard);
+        updateCardCounts();
         
         // Atualizar no servidor
-        socket.emit('update_card', {
-            id: cardId,
-            status: newStatus
+        fetch(`/api/cards/${cardId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        })
+        .then(response => {
+            console.log('📡 Resposta status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ Resposta do servidor:', data);
+            if (data.success) {
+                console.log('✅ Card atualizado com sucesso!');
+            } else {
+                console.error('❌ Servidor retornou sucesso=false:', data);
+                // Reverter mudança visual
+                oldContainer.appendChild(draggedCard);
+                updateCardCounts();
+                alert('Erro ao mover card. Tente novamente.');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Erro ao atualizar card:', error);
+            // Reverter mudança visual
+            oldContainer.appendChild(draggedCard);
+            updateCardCounts();
+            alert('Erro ao mover card: ' + error.message);
         });
-        
-        updateCardCounts();
     }
     
     return false;

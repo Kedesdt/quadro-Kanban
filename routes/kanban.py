@@ -75,11 +75,7 @@ def kanban():
     ]
 
     return render_template(
-        "kanban.html", 
-        cards=cards, 
-        team_members=team_members, 
-        card_colors=card_colors,
-        socket_path="/socket.io"
+        "kanban.html", cards=cards, team_members=team_members, card_colors=card_colors
     )
 
 
@@ -104,8 +100,5 @@ def kanban_fullscreen():
     team_members = User.query.filter_by(team_id=current_user.team_id).all()
 
     return render_template(
-        "kanban_fullscreen.html", 
-        cards=cards, 
-        team_members=team_members,
-        socket_path="/socket.io"
+        "kanban_fullscreen.html", cards=cards, team_members=team_members
     )
