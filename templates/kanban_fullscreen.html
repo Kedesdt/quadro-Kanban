@@ -10,9 +10,13 @@
 </head>
 <body class="fullscreen">
     <div class="fullscreen-header">
-        <button id="exitButton" class="exit-fullscreen" onclick="window.location.href='{{ url_for('kanban.kanban') }}'" data-url="{{ url_for('kanban.kanban') }}">
-            Voltar
-        </button>
+        <h1>📊 Quadro Kanban</h1>
+        <div class="header-buttons">
+            <button id="themeToggle" class="theme-toggle" title="Alternar tema">🌙</button>
+            <button id="exitButton" class="exit-fullscreen" onclick="window.location.href='{{ url_for('kanban.kanban') }}'" data-url="{{ url_for('kanban.kanban') }}">
+                Voltar
+            </button>
+        </div>
     </div>
 
     <div class="fullscreen-container">
@@ -26,7 +30,7 @@
                 <div class="fullscreen-card-container" id="todo-container">
                     {% for card in cards %}
                         {% if card.status == 'todo' %}
-                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, #ffffff15);">
                                 <div class="fullscreen-card-header">
                                     <h4>{{ card.title }}</h4>
                                 </div>
