@@ -127,7 +127,7 @@ body.fullscreen {
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 8px;
     padding-right: 5px;
 }
 
@@ -153,16 +153,19 @@ body.fullscreen {
 /* Cards */
 .fullscreen-card {
     background: white;
-    border-radius: 10px;
-    padding: 12px;
+    border-radius: 8px;
+    padding: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     transition: all 0.3s;
     cursor: default;
+    min-height: 45px;
 }
 
 .fullscreen-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-height: auto;
+    z-index: 10;
 }
 
 /* Animações de cards */
@@ -254,31 +257,54 @@ body.fullscreen {
     display: flex;
     justify-content: space-between;
     align-items: start;
-    margin-bottom: 8px;
+    margin-bottom: 0;
 }
 
 .fullscreen-card-header h4 {
-    font-size: 1.1rem;
+    font-size: 1rem;
     margin: 0;
     color: var(--text-primary);
     flex: 1;
+    font-weight: 600;
 }
 
 .fullscreen-card p {
     color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin: 8px 0;
+    font-size: 0.9rem;
+    margin: 8px 0 0 0;
     line-height: 1.4;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.fullscreen-card:hover p {
+    max-height: 200px;
+    opacity: 1;
+    margin: 8px 0;
 }
 
 .fullscreen-card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    font-size: 0.85rem;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.fullscreen-card:hover .fullscreen-card-footer {
+    max-height: 50px;
+    opacity: 1;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid #e2e8f0;
-    font-size: 0.85rem;
 }
 
 .fullscreen-card-footer small {
