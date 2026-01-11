@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeDragAndDrop();
     setupCreateCardForm();
     updateCardCounts();
+    setupCardClickHandlers();
 });
 
 // Formulário de criação de cards
@@ -64,6 +65,26 @@ function deleteCard(cardId) {
         })
         .catch(error => console.error('Erro ao deletar card:', error));
     }
+}
+
+// Configurar clique nos cards para editar
+function setupCardClickHandlers() {
+    const cards = document.querySelectorAll('.kanban-card');
+    cards.forEach(card => {
+        // Adicionar evento de clique, mas não no botão de deletar
+        card.addEventListener('click', function(e) {
+            // Não abrir edição se clicar no botão de deletar
+            if (e.target.classList.contains('delete-btn')) {
+                return;
+            }
+            
+            const cardId = this.dataset.id;
+            window.location.href = `/kanban/card/${cardId}/edit`;
+        });
+        
+        // Adicionar estilo de cursor
+        card.style.cursor = 'pointer';
+    });
 }
 
 // Drag and Drop

@@ -60,7 +60,7 @@
                 <div class="card-container" id="todo-container">
                     {% for card in cards %}
                         {% if card.status == 'todo' %}
-                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);" title="Clique para editar">
                                 <div class="card-header">
                                     <h4>{{ card.title }}</h4>
                                     <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>
@@ -88,7 +88,7 @@
                 <div class="card-container" id="doing-container">
                     {% for card in cards %}
                         {% if card.status == 'doing' %}
-                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);" title="Clique para editar">
                                 <div class="card-header">
                                     <h4>{{ card.title }}</h4>
                                     <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>
@@ -116,7 +116,7 @@
                 <div class="card-container" id="done-container">
                     {% for card in cards %}
                         {% if card.status == 'done' %}
-                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+                            <div class="kanban-card" draggable="true" data-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);" title="Clique para editar">
                                 <div class="card-header">
                                     <h4>{{ card.title }}</h4>
                                     <button class="delete-btn" onclick="deleteCard({{ card.id }})">×</button>

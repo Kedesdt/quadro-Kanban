@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Card - {{ card.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .edit-card-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .edit-card-container h2 {
+            margin-bottom: 25px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-preview {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            border-left: 5px solid;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .color-preview {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .info-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .admin-only {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        
+        .admin-only label {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Kanban Board</h1>
+            <div class="nav-menu">
+                <span class="username">{{ current_user.username }}</span>
+                <a href="{{ url_for('kanban.kanban') }}" class="btn btn-secondary">← Voltar ao Quadro</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="edit-card-container">
+        <h2>
+            <span>✏️ Editar Card</span>
+        </h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card-preview" id="cardPreview" style="border-left-color: {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, white);">
+            <strong id="previewTitle">{{ card.title }}</strong>
+            <p id="previewDesc">{{ card.description or 'Sem descrição' }}</p>
+            <small>Criado por: {{ card.creator.username }}</small>
+        </div>
+        
+        <form method="POST" action="{{ url_for('kanban.edit_card', card_id=card.id) }}">
+            <div class="form-group">
+                <label for="title">Título do Card *</label>
+                <input type="text" id="title" name="title" value="{{ card.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Descrição</label>
+                <textarea id="description" name="description">{{ card.description or '' }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="color">
+                    Cor do Card
+                    <span class="color-preview" id="colorPreview" style="background: {{ card.color }};"></span>
+                </label>
+                <select id="color" name="color">
+                    {% for color in card_colors %}
+                        <option value="{{ color.value }}" {% if color.value == card.color %}selected{% endif %}>
+                            {{ color.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            {% if current_user.is_admin %}
+                <div class="admin-only">
+                    <div class="form-group">
+                        <label for="assigned_to">👤 Atribuir a um membro</label>
+                        <select id="assigned_to" name="assigned_to">
+                            <option value="">-- Não atribuído --</option>
+                            {% for member in team_members %}
+                                <option value="{{ member.id }}" {% if card.assigned_to_id == member.id %}selected{% endif %}>
+                                    {{ member.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="info-badge">⚡ Apenas administradores podem atribuir cards</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label>Atribuído a:</label>
+                    <span class="info-badge">
+                        {% if card.assigned_to %}
+                            👤 {{ card.assigned_to.username }}
+                        {% else %}
+                            Não atribuído
+                        {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label>Status Atual:</label>
+                <span class="info-badge">
+                    {% if card.status == 'todo' %}📋 A Fazer
+                    {% elif card.status == 'doing' %}⚙️ Fazendo
+                    {% elif card.status == 'done' %}✅ Concluído
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+                <a href="{{ url_for('kanban.kanban') }}" class="btn btn-secondary">❌ Cancelar</a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Preview em tempo real
+        const titleInput = document.getElementById('title');
+        const descInput = document.getElementById('description');
+        const colorSelect = document.getElementById('color');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewDesc = document.getElementById('previewDesc');
+        const cardPreview = document.getElementById('cardPreview');
+        const colorPreview = document.getElementById('colorPreview');
+        
+        titleInput.addEventListener('input', function() {
+            previewTitle.textContent = this.value || 'Sem título';
+        });
+        
+        descInput.addEventListener('input', function() {
+            previewDesc.textContent = this.value || 'Sem descrição';
+        });
+        
+        colorSelect.addEventListener('change', function() {
+            const color = this.value;
+            cardPreview.style.borderLeftColor = color;
+            cardPreview.style.background = `linear-gradient(135deg, ${color}15, white)`;
+            colorPreview.style.background = color;
+        });
+    </script>
+</body>
+</html>
