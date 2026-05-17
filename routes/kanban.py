@@ -49,9 +49,10 @@ def kanban():
     # Arquivar cards antigos
     archive_old_completed_cards()
 
-    # Buscar apenas cards não arquivados
+    # Buscar apenas cards não arquivados e que sejam de nível raiz (sem parent)
     cards = (
         Card.query.filter_by(team_id=current_user.team_id, archived=False)
+        .filter(Card.parent_id.is_(None))
         .order_by(Card.position)
         .all()
     )
@@ -156,9 +157,51 @@ def kanban_fullscreen():
     # Arquivar cards antigos
     archive_old_completed_cards()
 
-    # Buscar apenas cards não arquivados
+    # Buscar apenas cards não arquivados e que sejam de nível raiz (sem parent)
     cards = (
         Card.query.filter_by(team_id=current_user.team_id, archived=False)
+        .filter(Card.parent_id.is_(None))
+        .order_by(Card.position)
+        .all()
+    )
+
+    team_members = User.query.filter_by(team_id=current_user.team_id).all()
+
+    # Pré-carregar subitens para todos os cards (evita N+1 queries no template)
+    # e preparar dados JSON-friendly
+    cards_with_children = []
+    for card in cards:
+        children_data = [
+            {"id": child.id, "title": child.title, "status": child.status}
+            for child in card.children
+        ]
+        cards_with_children.append({"card": card, "children": children_data})
+
+    return render_template(
+        "kanban_fullscreen.html",
+        cards=cards,
+        cards_data=cards_with_children,
+        team_members=team_members,
+    )
+
+
+@kanban_bp.route("/kanban/card/<int:card_id>")
+@login_required
+def kanban_item(card_id):
+    """Exibir Kanban do card (subitens do card).
+    Mostra o card pai e seus subcards (children)."""
+    card = Card.query.get_or_404(card_id)
+
+    # Verificar se pertence ao time
+    if card.team_id != current_user.team_id:
+        flash("Você não tem permissão para ver este quadro", "error")
+        return redirect(url_for("kanban.kanban"))
+
+    # Buscar subcards
+    subcards = (
+        Card.query.filter_by(
+            team_id=current_user.team_id, archived=False, parent_id=card.id
+        )
         .order_by(Card.position)
         .all()
     )
@@ -166,5 +209,5 @@ def kanban_fullscreen():
     team_members = User.query.filter_by(team_id=current_user.team_id).all()
 
     return render_template(
-        "kanban_fullscreen.html", cards=cards, team_members=team_members
+        "kanban_item.html", parent=card, cards=subcards, team_members=team_members
     )

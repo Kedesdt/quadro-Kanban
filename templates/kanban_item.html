@@ -3,23 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="refresh" content="600">
-    <title>Quadro Kanban</title>
+    <title>Quadro do Item - {{ parent.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1>Kanban Board</h1>
+            <h1>📌 {{ parent.title }} <span style="font-size: 0.8em; color: #999;">({{ parent.completion_percentage() }}%)</span></h1>
             <div class="nav-menu">
-                <span class="username">{{ current_user.username }}</span>
-                <a href="{{ url_for('kanban.kanban_fullscreen') }}" class="btn btn-primary" title="Visualizar em tela cheia">🖥️ Tela Cheia</a>
-                {% if current_user.is_admin %}
-                    <a href="{{ url_for('team.team_management') }}" class="btn btn-secondary">Gerenciar Equipe</a>
-                {% endif %}
-                <a href="{{ url_for('history.history') }}" class="btn btn-secondary">Histórico</a>
-                <a href="{{ url_for('export.export_data') }}" class="btn btn-secondary">Exportar</a>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
+                <a href="{{ url_for('kanban.kanban') }}" class="btn btn-secondary">Voltar ao Quadro Raiz</a>
+                <a href="{{ url_for('kanban.kanban_fullscreen') }}" class="btn btn-secondary">Tela Cheia (Raiz)</a>
             </div>
         </div>
     </nav>
@@ -34,10 +27,10 @@
         {% endwith %}
 
         <div class="create-card-section">
-            <h2>Criar Novo Card</h2>
-            <form id="createCardForm">
+            <h2>Criar Subitem</h2>
+            <form id="createCardForm" data-parent-id="{{ parent.id }}">
                 <div class="form-row">
-                    <input type="text" id="cardTitle" placeholder="Título do card" required>
+                    <input type="text" id="cardTitle" placeholder="Título do subitem" required>
                     <input type="text" id="cardDescription" placeholder="Descrição (opcional)">
                     <select id="cardColor" class="color-select">
                         <option value="#667eea">🔵 Azul</option>
@@ -46,7 +39,7 @@
                         <option value="#fee140">🟡 Amarelo</option>
                         <option value="#ff9a9e">🟠 Coral</option>
                     </select>
-                    <button type="submit" class="btn btn-success">Criar Card</button>
+                    <button type="submit" class="btn btn-success">Criar Subitem</button>
                 </div>
             </form>
         </div>

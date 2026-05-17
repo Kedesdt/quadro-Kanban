@@ -56,6 +56,7 @@ class Card(db.Model):
     completed_at = db.Column(db.DateTime, nullable=True)
     archived = db.Column(db.Boolean, default=False)
     archived_at = db.Column(db.DateTime, nullable=True)
+    parent_id = db.Column(db.Integer, db.ForeignKey("card.id"), nullable=True)
 
     creator = db.relationship(
         "User", foreign_keys=[creator_id], back_populates="created_cards"
@@ -67,6 +68,80 @@ class Card(db.Model):
     history = db.relationship(
         "CardHistory", back_populates="card", cascade="all, delete-orphan", lazy=True
     )
+    # Relação pai/filhos para subcards
+    parent = db.relationship('Card', remote_side=[id], backref=db.backref('children', lazy=True))
+
+    def completion_percentage(self):
+        """Calcula a porcentagem de conclusão pelos subitens (children).
+        Se não tiver subitens, retorna 100 se o próprio card estiver em 'done', senão 0.
+        """
+        total = len(self.children)
+        if total == 0:
+            return 100 if self.status == 'done' else 0
+        done = sum(1 for c in self.children if c.status == 'done')
+        return int((done / total) * 100)
+
+    def propagate_status_to_parent(self, user_id=None):
+        """Propaga o status do card para seus pais recursivamente.
+
+        Regras:
+        - Se qualquer filho estiver em 'doing' -> pai = 'doing'
+        - Se todos os filhos estiverem em 'done' (e houver filhos) -> pai = 'done'
+        - Caso contrário -> pai = 'todo'
+
+        O método cria entradas de histórico (`CardHistory`) quando um pai muda de status.
+        """
+        parent = self.parent
+        # Use provided user_id for history if given, else try to fall back to creator
+        uid = user_id or getattr(self, 'creator_id', None)
+
+        while parent:
+            children_statuses = [c.status for c in parent.children]
+            statuses = set(children_statuses)
+
+            # Regras desejadas:
+            # - Se qualquer filho estiver em 'doing' -> pai = 'doing'
+            # - Se todos os filhos estiverem em 'done' -> pai = 'done'
+            # - Se todos os filhos estiverem em 'todo' -> pai = 'todo'
+            # - Caso misto (ex: some 'todo' e some 'done', sem 'doing') -> pai = 'doing'
+            if 'doing' in statuses:
+                new_status = 'doing'
+            elif statuses == {'done'}:
+                new_status = 'done'
+            elif statuses == {'todo'}:
+                new_status = 'todo'
+            else:
+                new_status = 'doing'
+
+            if parent.status != new_status:
+                old_status = parent.status
+                parent.status = new_status
+                if new_status == 'done':
+                    parent.completed_at = datetime.utcnow()
+                else:
+                    parent.completed_at = None
+
+                # registrar histórico se a classe CardHistory estiver disponível
+                try:
+                    history = CardHistory(
+                        card_id=parent.id,
+                        action='moved',
+                        old_status=old_status,
+                        new_status=new_status,
+                        user_id=uid or parent.creator_id,
+                        details=f'Auto-propagado a partir do subitem {self.id}',
+                    )
+                    db.session.add(history)
+                except Exception:
+                    # Se CardHistory não existir ainda ou erro, ignore histórico
+                    pass
+
+                db.session.commit()
+                # continuar subindo na hierarquia
+                parent = parent.parent
+            else:
+                # sem mudança — não precisa subir mais
+                break
 
     def get_time_in_status(self):
         """Calcula tempo no status atual"""

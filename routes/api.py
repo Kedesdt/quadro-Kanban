@@ -25,6 +25,14 @@ def create_card():
         team_id=current_user.team_id,
     )
 
+    # Parent (subcard) opcional
+    parent_id = data.get('parent_id')
+    if parent_id:
+        parent = Card.query.get(parent_id)
+        if not parent or parent.team_id != current_user.team_id:
+            return jsonify({"success": False, "error": "Parent inválido"}), 400
+        new_card.parent_id = parent_id
+
     db.session.add(new_card)
     db.session.commit()
 
@@ -127,6 +135,12 @@ def update_card(card_id):
     db.session.commit()
 
     print(f"✅ Card {card_id} atualizado: {old_status} -> {card.status}")
+
+    # Propagar mudança de status para pais (se houver)
+    try:
+        card.propagate_status_to_parent(user_id=current_user.id)
+    except Exception as e:
+        print(f"⚠️ Erro ao propagar status para pais: {e}")
 
     return jsonify(
         {

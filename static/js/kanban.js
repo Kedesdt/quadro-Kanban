@@ -20,18 +20,23 @@ function setupCreateCardForm() {
         const color = document.getElementById('cardColor').value;
         
         if (title) {
+            // Se o formulário tiver um parent_id (data-parent-id), incluir no payload
+            const parentId = form.dataset.parentId ? parseInt(form.dataset.parentId) : null;
+            const payload = {
+                title: title,
+                description: description,
+                status: 'todo',
+                position: 0,
+                color: color
+            };
+            if (parentId) payload.parent_id = parentId;
+
             fetch('/api/cards', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    title: title,
-                    description: description,
-                    status: 'todo',
-                    position: 0,
-                    color: color
-                })
+                body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
@@ -45,6 +50,7 @@ function setupCreateCardForm() {
         }
     });
 }
+
 
 
 
@@ -67,19 +73,20 @@ function deleteCard(cardId) {
     }
 }
 
-// Configurar clique nos cards para editar
+// Configurar clique nos cards para abrir quadro do item
 function setupCardClickHandlers() {
     const cards = document.querySelectorAll('.kanban-card');
     cards.forEach(card => {
-        // Adicionar evento de clique, mas não no botão de deletar
+        // Adicionar evento de clique, mas não em botões especiais
         card.addEventListener('click', function(e) {
-            // Não abrir edição se clicar no botão de deletar
-            if (e.target.classList.contains('delete-btn')) {
+            // Não abrir se clicar em botões de ação (delete, editar, etc)
+            if (e.target.classList.contains('delete-btn') || e.target.classList.contains('edit-btn')) {
                 return;
             }
             
             const cardId = this.dataset.id;
-            window.location.href = `/kanban/card/${cardId}/edit`;
+            // Sistema recursivo: sempre abre o quadro Kanban do item
+            window.location.href = `/kanban/card/${cardId}`;
         });
         
         // Adicionar estilo de cursor

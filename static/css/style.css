@@ -360,6 +360,34 @@ body {
     margin-right: 10px;
 }
 
+.card-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.edit-btn {
+    background: var(--warning-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.edit-btn:hover {
+    background: #dd7833;
+    transform: scale(1.1);
+}
+
 .delete-btn {
     background: var(--danger-color);
     color: white;

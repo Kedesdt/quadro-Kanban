@@ -28,20 +28,23 @@
                     <span class="fullscreen-card-count" id="todo-count">0</span>
                 </div>
                 <div class="fullscreen-card-container" id="todo-container">
-                    {% for card in cards %}
-                        {% if card.status == 'todo' %}
-                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, #ffffff15);">
+                    {% for item in cards_data %}
+                        {% if item.card.status == 'todo' %}
+                            <div class="fullscreen-card" data-card-id="{{ item.card.id }}" data-children='{{ item.children | tojson }}' style="border-left: 5px solid {{ item.card.color }}; background: linear-gradient(135deg, {{ item.card.color }}15, #ffffff15);" title="Passe o mouse para ver subitens">
                                 <div class="fullscreen-card-header">
-                                    <h4>{{ card.title }}</h4>
+                                    <h4>{{ item.card.title }}</h4>
+                                    {% if item.children %}
+                                        <span class="completion-badge">{{ item.card.completion_percentage() }}%</span>
+                                    {% endif %}
                                 </div>
-                                {% if card.description %}
-                                    <p>{{ card.description }}</p>
+                                {% if item.card.description %}
+                                    <p>{{ item.card.description }}</p>
                                 {% endif %}
                                 <div class="fullscreen-card-footer">
-                                    <small>👤 {{ card.creator.username }}</small>
-                                    {% if card.assigned_to %}
-                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
-                                            ✓ {{ card.assigned_to.username }}
+                                    <small>👤 {{ item.card.creator.username }}</small>
+                                    {% if item.card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ item.card.color }};">
+                                            ✓ {{ item.card.assigned_to.username }}
                                         </span>
                                     {% endif %}
                                 </div>
@@ -58,20 +61,23 @@
                     <span class="fullscreen-card-count" id="doing-count">0</span>
                 </div>
                 <div class="fullscreen-card-container" id="doing-container">
-                    {% for card in cards %}
-                        {% if card.status == 'doing' %}
-                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, #ffffff15);">
+                    {% for item in cards_data %}
+                        {% if item.card.status == 'doing' %}
+                            <div class="fullscreen-card" data-card-id="{{ item.card.id }}" data-children='{{ item.children | tojson }}' style="border-left: 5px solid {{ item.card.color }}; background: linear-gradient(135deg, {{ item.card.color }}15, #ffffff15);" title="Passe o mouse para ver subitens">
                                 <div class="fullscreen-card-header">
-                                    <h4>{{ card.title }}</h4>
+                                    <h4>{{ item.card.title }}</h4>
+                                    {% if item.children %}
+                                        <span class="completion-badge">{{ item.card.completion_percentage() }}%</span>
+                                    {% endif %}
                                 </div>
-                                {% if card.description %}
-                                    <p>{{ card.description }}</p>
+                                {% if item.card.description %}
+                                    <p>{{ item.card.description }}</p>
                                 {% endif %}
                                 <div class="fullscreen-card-footer">
-                                    <small>👤 {{ card.creator.username }}</small>
-                                    {% if card.assigned_to %}
-                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
-                                            ✓ {{ card.assigned_to.username }}
+                                    <small>👤 {{ item.card.creator.username }}</small>
+                                    {% if item.card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ item.card.color }};">
+                                            ✓ {{ item.card.assigned_to.username }}
                                         </span>
                                     {% endif %}
                                 </div>
@@ -88,20 +94,23 @@
                     <span class="fullscreen-card-count" id="done-count">0</span>
                 </div>
                 <div class="fullscreen-card-container" id="done-container">
-                    {% for card in cards %}
-                        {% if card.status == 'done' %}
-                            <div class="fullscreen-card" data-card-id="{{ card.id }}" style="border-left: 5px solid {{ card.color }}; background: linear-gradient(135deg, {{ card.color }}15, #ffffff15);">
+                    {% for item in cards_data %}
+                        {% if item.card.status == 'done' %}
+                            <div class="fullscreen-card" data-card-id="{{ item.card.id }}" data-children='{{ item.children | tojson }}' style="border-left: 5px solid {{ item.card.color }}; background: linear-gradient(135deg, {{ item.card.color }}15, #ffffff15);" title="Passe o mouse para ver subitens">
                                 <div class="fullscreen-card-header">
-                                    <h4>{{ card.title }}</h4>
+                                    <h4>{{ item.card.title }}</h4>
+                                    {% if item.children %}
+                                        <span class="completion-badge">{{ item.card.completion_percentage() }}%</span>
+                                    {% endif %}
                                 </div>
-                                {% if card.description %}
-                                    <p>{{ card.description }}</p>
+                                {% if item.card.description %}
+                                    <p>{{ item.card.description }}</p>
                                 {% endif %}
                                 <div class="fullscreen-card-footer">
-                                    <small>👤 {{ card.creator.username }}</small>
-                                    {% if card.assigned_to %}
-                                        <span class="fullscreen-assigned-badge" style="background: {{ card.color }};">
-                                            ✓ {{ card.assigned_to.username }}
+                                    <small>👤 {{ item.card.creator.username }}</small>
+                                    {% if item.card.assigned_to %}
+                                        <span class="fullscreen-assigned-badge" style="background: {{ item.card.color }};">
+                                            ✓ {{ item.card.assigned_to.username }}
                                         </span>
                                     {% endif %}
                                 </div>
@@ -123,5 +132,6 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/fullscreen.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fullscreen-children.js') }}"></script>
 </body>
 </html>
